@@ -1,5 +1,10 @@
-# HTB - CozyHosting Writeup
-## 1. Initial enumeration
+---
+layout: post
+title: "HTB - CozyHosting Writeup"
+categories: writeup
+---
+
+# 1. Initial enumeration
 This writeup is meant to give an overview of the challenge's solution without spoiling too much of the key details so you can still have fun while following it !
 
 First and foremost, as usual for any challenge we can run a simple port scan using nmap:
@@ -22,7 +27,7 @@ This gives us a list of pages to visit, one of which seems to hold valuable info
 This can be used to bypass the login and access to the admin panel:
 ![](CozyHosting/Screenshots/Selection_045.png)
 
-## 2. Foothold
+# 2. Foothold
 We gained a first access on the site, we now need a way to execute arbitrary commands on the host.
 On the adnmin page we can a function to patch hosts:
 ![](CozyHosting/Screenshots/Selection_067.png)
@@ -41,7 +46,7 @@ A jar file is also present in /app, this file should be downloaded on our machin
 
 The file application.properties contains credentials for a postegres database so we now need a way to access it as it might be our avenue to compromise a user account.
 
-## 3. Gaining access
+# 3. Gaining access
 We can't access the database directly from our machine, however we could by setting up a tunnel from the client to our machine. This can be done using a tool such as Chisel. The tool must be downloaded and deployed on both sides:
 
 ![](CozyHosting/Screenshots/Selection_072.png)![](CozyHosting/Screenshots/Selection_073.png) 
@@ -54,7 +59,7 @@ the user table contains two users with a password hash for each of them. Using J
 
 We can then use this password as well as the username retrieved earlier to connect to our target using SSH. This gives us access to our user flag !
 
-## 4. Privilege escalation
+# 4. Privilege escalation
 Privilege escalation on this machine relies on a very common method, often found in easy challenges. Using 'sudo -l' you should have enough information to find which command can be exploited to get root access and open the flag in the /root directory ! (This site can help you find what you are looking for: https://gtfobins.github.io !)
 
 Congratulations !

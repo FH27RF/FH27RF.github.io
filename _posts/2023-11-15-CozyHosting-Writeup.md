@@ -48,11 +48,7 @@ A jar file is also present in /app, this file should be downloaded on our machin
 The file application.properties contains credentials for a postegres database so we now need a way to access it as it might be our avenue to compromise a user account.
 
 # 3. Gaining access
-We can't access the database directly from our machine, however we could by setting up a tunnel from the client to our machine. This can be done using a tool such as Chisel. The tool must be downloaded and deployed on both sides:
-
-![](/assets/writeups/CozyHosting/Selection_072.png)![](/assets/writeups/CozyHosting/Selection_073.png) 
-
-We can then access the database from our machine:
+We now have all the information required to connect to the database:
 ![](/assets/writeups/CozyHosting/Selection_071.png)
 
 the user table contains two users with a password hash for each of them. Using John the ripper or Hashcat we can easily crack the admin password which is in the rockyou list.

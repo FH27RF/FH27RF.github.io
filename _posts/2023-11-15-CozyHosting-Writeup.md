@@ -4,9 +4,9 @@ title: "HTB - CozyHosting Writeup"
 categories: writeup
 ---
 
-# 1. Initial enumeration
 This writeup is meant to give an overview of the challenge's solution without spoiling too much of the key details so you can still have fun while following it !
 
+# 1. Initial enumeration
 First and foremost, as usual for any challenge we can run a simple port scan using nmap:
 ![](/assets/CozyHosting/Selection_063.png)
 

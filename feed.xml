@@ -1,34 +1,34 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-11-19T12:40:48+00:00</updated><id>/feed.xml</id><title type="html">FH27RF</title><subtitle>CTF journal.</subtitle><entry><title type="html">HTB - Codify Writeup</title><link href="/writeup/2023/11/19/Codify-Writeup.html" rel="alternate" type="text/html" title="HTB - Codify Writeup" /><published>2023-11-19T00:00:00+00:00</published><updated>2023-11-19T00:00:00+00:00</updated><id>/writeup/2023/11/19/Codify-Writeup</id><content type="html" xml:base="/writeup/2023/11/19/Codify-Writeup.html"><![CDATA[<h1 id="this-writeup-is-meant-to-give-an-overview-of-the-challenges-solution-without-spoiling-too-much-of-the-key-details-so-you-can-still-have-fun-while-following-it-">This writeup is meant to give an overview of the challenge’s solution without spoiling too much of the key details so you can still have fun while following it !</h1>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-11-19T12:43:13+00:00</updated><id>/feed.xml</id><title type="html">FH27RF</title><subtitle>CTF journal.</subtitle><entry><title type="html">HTB - Codify Writeup</title><link href="/writeup/2023/11/19/Codify-Writeup.html" rel="alternate" type="text/html" title="HTB - Codify Writeup" /><published>2023-11-19T00:00:00+00:00</published><updated>2023-11-19T00:00:00+00:00</updated><id>/writeup/2023/11/19/Codify-Writeup</id><content type="html" xml:base="/writeup/2023/11/19/Codify-Writeup.html"><![CDATA[<h1 id="this-writeup-is-meant-to-give-an-overview-of-the-challenges-solution-without-spoiling-too-much-of-the-key-details-so-you-can-still-have-fun-while-following-it-">This writeup is meant to give an overview of the challenge’s solution without spoiling too much of the key details so you can still have fun while following it !</h1>
 
 <h1 id="1-initial-enumeration">1. Initial enumeration</h1>
 <p>First and foremost, as usual for any challenge we can run a simple port scan using nmap:
-<img src="/assets/writeups//assets/writeups/Codify/Selection_110.png" alt="" /></p>
+<img src="/assets/writeups/Codify/Selection_110.png" alt="" /></p>
 
 <p>Given the port 80 is opened we can try to access this address from our browser. It is trying to redirect to codify.htb, so after adding it to our hosts file we land on the main page:
-<img src="/assets/writeups//assets/writeups/Codify/Selection_111.png" alt="" /></p>
+<img src="/assets/writeups/Codify/Selection_111.png" alt="" /></p>
 
 <h1 id="2-foothold">2. Foothold</h1>
 <p>This site mainly consists of a sandbox that will run javascript code. This functionnality relies on the vm2 module which is vulnerable. After looking for an exploit I found a piece of code that allows us to run arbitrary system commands in the sandbox:
-<img src="/assets/writeups//assets/writeups/Codify/Selection_079.png" alt="" /></p>
+<img src="/assets/writeups/Codify/Selection_079.png" alt="" /></p>
 
 <p>This vulnerability can now be exploited to add our own ssh public key to the authorized list in /home/svc/.ssh/ which allows us to open an ssh session:
-<img src="/assets/writeups//assets/writeups/Codify/Selection_082.png" alt="" /></p>
+<img src="/assets/writeups/Codify/Selection_082.png" alt="" /></p>
 
 <h1 id="3-gaining-access">3. Gaining access</h1>
 <p>From there we can look around, and there is an interesting file in the /var/www/contacts directory. tickets.db is a mysql database that we can directly open from this shell:
-<img src="/assets/writeups//assets/writeups/Codify/Selection_084.png" alt="" /></p>
+<img src="/assets/writeups/Codify/Selection_084.png" alt="" /></p>
 
 <p>This gives us a username and a hash we can now try to crack using John or Hashcat:
-<img src="/assets/writeups//assets/writeups/Codify/Selection_085.png" alt="" /></p>
+<img src="/assets/writeups/Codify/Selection_085.png" alt="" /></p>
 
 <p>We can now try to log in as joshua using ssh and retrieve the user flag from /home/joshua/user.txt !</p>
 
 <h1 id="4-privilege-escalation">4. Privilege escalation</h1>
 <p>The first step is to check if this user has access to commands with root privilege:
-<img src="/assets/writeups//assets/writeups/Codify/Selection_088.png" alt="" /></p>
+<img src="/assets/writeups/Codify/Selection_088.png" alt="" /></p>
 
 <p>We see that this user can run the following script with root privilege:
-<img src="/assets/writeups//assets/writeups/Codify/Selection_090.png" alt="" /></p>
+<img src="/assets/writeups/Codify/Selection_090.png" alt="" /></p>
 
 <p>This script’s comparison method is vulnerable given it doesn’t compare strings but is matching two expression, we can check that by running it and entering ‘*’ as the password which will backup data.
 We can now use this to brute force the password one character at a time. For instance if the password is Qwerty123, running the script with Q* will be successful, then with Qw* etc.</p>

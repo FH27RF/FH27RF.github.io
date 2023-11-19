@@ -5,7 +5,7 @@ categories: writeup
 tags: linux easy
 ---
 
-# This writeup is meant to give an overview of the challenge's solution without spoiling too much of the key details so you can still have fun while following it !
+This writeup for the challenge Codify on Hackthebox is meant to give an overview of the challenge's solution without spoiling too much of the key details so you can still have fun while following it !
 
 # 1. Initial enumeration
 First and foremost, as usual for any challenge we can run a simple port scan using nmap:

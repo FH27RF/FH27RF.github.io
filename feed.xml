@@ -1,61 +1,61 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-12-09T17:18:56+00:00</updated><id>/feed.xml</id><title type="html">FH27RF</title><subtitle>CTF journal.</subtitle><entry><title type="html">HTB - Devvortex Writeup</title><link href="/writeup/2023/12/09/Devvortex-Writeup.html" rel="alternate" type="text/html" title="HTB - Devvortex Writeup" /><published>2023-12-09T00:00:00+00:00</published><updated>2023-12-09T00:00:00+00:00</updated><id>/writeup/2023/12/09/Devvortex-Writeup</id><content type="html" xml:base="/writeup/2023/12/09/Devvortex-Writeup.html"><![CDATA[<p>This writeup for the challenge Devvortex on Hackthebox is meant to give an overview of the challenge’s solution without spoiling too much of the key details so you can still have fun while following it !</p>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.2">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2023-12-09T17:23:41+00:00</updated><id>/feed.xml</id><title type="html">FH27RF</title><subtitle>CTF journal.</subtitle><entry><title type="html">HTB - Devvortex Writeup</title><link href="/writeup/2023/12/09/Devvortex-Writeup.html" rel="alternate" type="text/html" title="HTB - Devvortex Writeup" /><published>2023-12-09T00:00:00+00:00</published><updated>2023-12-09T00:00:00+00:00</updated><id>/writeup/2023/12/09/Devvortex-Writeup</id><content type="html" xml:base="/writeup/2023/12/09/Devvortex-Writeup.html"><![CDATA[<p>This writeup for the challenge Devvortex on Hackthebox is meant to give an overview of the challenge’s solution without spoiling too much of the key details so you can still have fun while following it !</p>
 
 <h1 id="1-initial-enumeration">1. Initial enumeration</h1>
 <p>First and foremost, as usual for any challenge we can run a simple port scan using nmap:
-<img src="../assets/writeups/Devvortex/Selection_146.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_146.png" alt="" /></p>
 
 <p>Given the port 80 is opened we can try to access this address from our browser. It is trying to redirect to devvortex.htb, so after adding it to our hosts file we land on the main page:
-<img src="../assets/writeups/Devvortex/Selection_147.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_147.png" alt="" /></p>
 
 <p>This site doesn’t provide much functionnality that might be exploited to gain access to a protected account, so we should continue the enumeration process using gobuster to discover subdomains if any is available:
-<img src="../assets/writeups/Devvortex/Selection_114.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_114.png" alt="" /></p>
 
 <p>We found dev.devvortex.htb which lands us on another site:
-<img src="../assets/writeups/Devvortex/Selection_112.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_112.png" alt="" /></p>
 
 <h1 id="2-foothold">2. Foothold</h1>
 <p>Using gobuster in directory mode we discover some interesting pages, especially the /administrator which is a Joomla login page:
-<img src="../assets/writeups/Devvortex/Selection_148.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_148.png" alt="" /></p>
 
-<p><img src="../assets/writeups/Devvortex/Selection_149.png" alt="" /></p>
+<p><img src="/assets/writeups/Devvortex/Selection_149.png" alt="" /></p>
 
 <p>Also, trying to access the default README.txt allows us to retrieve the version of Joomla running on the site:
-<img src="../assets/writeups/Devvortex/Selection_150.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_150.png" alt="" /></p>
 
 <p>Checking the known vulnerabilities for this version we find this CVE which happens to have a metasploit module for it:
-<img src="../assets/writeups/Devvortex/Selection_118.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_118.png" alt="" /></p>
 
 <p>Using the metaploit module we get credentials to login on the admin pannel:
-<img src="../assets/writeups/Devvortex/Selection_119.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_119.png" alt="" /></p>
 
 <h1 id="3-gaining-access">3. Gaining access</h1>
 <p>Now that we have access to the admin panel of the site we can try to find a way to upload a PHP reverse shell on it. An easy way to do that is to find a file we are allowed to edit:
-<img src="../assets/writeups/Devvortex/Selection_130.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_130.png" alt="" /></p>
 
 <p>This gives us access to a remote shell:</p>
 
-<p><img src="../assets/writeups/Devvortex/Selection_131.png" alt="" /></p>
+<p><img src="/assets/writeups/Devvortex/Selection_131.png" alt="" /></p>
 
 <p>From there we can attempt to login to the mysql database on localhost on try to find some relevent information to access an account with higher privileges. This gives us another username and a password hash:
-<img src="../assets/writeups/Devvortex/Selection_135.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_135.png" alt="" /></p>
 
 <p>Using John we can crack this hash with the rockyou wordlist:
-<img src="../assets/writeups/Devvortex/Selection_137.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_137.png" alt="" /></p>
 
 <p>This allows us to login on this account using ssh:
-<img src="../assets/writeups/Devvortex/Selection_138.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_138.png" alt="" /></p>
 
 <p>We now have access to the user flag in the home directory.</p>
 
 <h1 id="4-privilege-escalation">4. Privilege escalation</h1>
 <p>The first step is to check if this user has access to commands with root privilege:
-<img src="../assets/writeups/Devvortex/Selection_140.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_140.png" alt="" /></p>
 
 <p>We see that this user can run apport-cli with root privilege, we can retrive its version with -v:
-<img src="../assets/writeups/Devvortex/Selection_142.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_142.png" alt="" /></p>
 
 <p>Searching online for known vulnerabilities we find that CVE-2023-1326 can be used for privilege escalation. Following the instruction to achieve this exploit we obtain root access on the machine:
-<img src="../assets/writeups/Devvortex/Selection_145.png" alt="" /></p>
+<img src="/assets/writeups/Devvortex/Selection_145.png" alt="" /></p>
 
 <p>We can now change to root with the su command and get the flag from /root/root.txt.
 Congratulations !</p>]]></content><author><name></name></author><category term="writeup" /><category term="linux" /><category term="ctf" /><summary type="html"><![CDATA[This writeup for the challenge Devvortex on Hackthebox is meant to give an overview of the challenge’s solution without spoiling too much of the key details so you can still have fun while following it !]]></summary></entry><entry><title type="html">HTB - Codify Writeup</title><link href="/writeup/2023/11/19/Codify-Writeup.html" rel="alternate" type="text/html" title="HTB - Codify Writeup" /><published>2023-11-19T00:00:00+00:00</published><updated>2023-11-19T00:00:00+00:00</updated><id>/writeup/2023/11/19/Codify-Writeup</id><content type="html" xml:base="/writeup/2023/11/19/Codify-Writeup.html"><![CDATA[<p>This writeup for the challenge Codify on Hackthebox is meant to give an overview of the challenge’s solution without spoiling too much of the key details so you can still have fun while following it !</p>

@@ -2,7 +2,7 @@
 layout: post
 title: "HTB - Codify Writeup"
 categories: writeup
-tags: linux easy
+tags: linux ctf
 ---
 
 This writeup for the challenge Codify on Hackthebox is meant to give an overview of the challenge's solution without spoiling too much of the key details so you can still have fun while following it !
